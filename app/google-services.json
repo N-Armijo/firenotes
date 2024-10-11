@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "802821785841",
+    "project_id": "firenotes-5ebd5",
+    "storage_bucket": "firenotes-5ebd5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:802821785841:android:f8343a0284c4e2c6d44150",
+        "android_client_info": {
+          "package_name": "com.narmijo.notasfirebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAP9MXa0jMCC6uoZM-GXqEECTCB-iiHpRo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
