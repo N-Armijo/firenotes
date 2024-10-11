@@ -120,7 +120,7 @@ public class Login extends AppCompatActivity {
                     }
                 });
     }
-
+    // Al presionar la flecha hacia atras nos envia a la actividad de registro
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();
