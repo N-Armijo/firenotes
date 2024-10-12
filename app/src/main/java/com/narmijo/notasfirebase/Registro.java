@@ -1,6 +1,5 @@
 package com.narmijo.notasfirebase;
 
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +22,12 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.narmijo.notasfirebase.R;
+
 
 import java.util.HashMap;
 
@@ -34,6 +39,10 @@ public class Registro extends AppCompatActivity {
     TextView TengounacuentaTXT;
 
     FirebaseAuth firebaseAuth;
+
+
+
+    private FirebaseFirestore db;
     ProgressDialog progressDialog;
 
     //
@@ -58,9 +67,6 @@ public class Registro extends AppCompatActivity {
 
         firebaseAuth = FirebaseAuth.getInstance();
 
-        progressDialog = new ProgressDialog(Registro.this);
-        progressDialog.setTitle("Espere por favor");
-        progressDialog.setCanceledOnTouchOutside(false);
 
         RegistrarUsuario.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,7 +83,7 @@ public class Registro extends AppCompatActivity {
             }
         });
     }
-//Estamos fuera del onCreate
+
     private void ValidarDatos(){
         nombre = NombreEt.getText().toString();
         correo = CorreoEt.getText().toString();
@@ -107,65 +113,50 @@ public class Registro extends AppCompatActivity {
     }
 
     private void CrearCuenta() {
-        progressDialog.setMessage("Creando su cuenta...");
-        progressDialog.show();
-
-        //Crear un usuario en Firebase
         firebaseAuth.createUserWithEmailAndPassword(correo, password)
-                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                    @Override
-                    public void onSuccess(AuthResult authResult) {
-                        //
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(Registro.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
                         GuardarInformacion();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        progressDialog.dismiss();
-                        Toast.makeText(Registro.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(Registro.this, MenuPrincipal.class);
+                        startActivity(intent); // Inicia la actividad después de registrar
+                        finish(); // Cierra la actividad de login
+                    } else {
+                        Toast.makeText(Registro.this, "Error en el registro: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
 
     }
 
     private void GuardarInformacion() {
-        progressDialog.setMessage("Guardando su información");
-        progressDialog.dismiss();
+        FirebaseUser user = firebaseAuth.getCurrentUser();
+        if (user != null ) {
+            //Obtener la identificación de usuario actual
+            String uid = firebaseAuth.getUid();
 
-        //Obtener la identificación de usuario actual
-        String uid = firebaseAuth.getUid();
+            HashMap<String, String> Datos = new HashMap<>();
+            Datos.put("uid",  uid);
+            Datos.put("correo", correo);
+            Datos.put("nombres", nombre);
+            Datos.put("password", password);
+            //Es la db
 
-        HashMap<String, String> Datos = new HashMap<>();
-        Datos.put("uid",  uid);
-        Datos.put("correo", correo);
-        Datos.put("nombres", nombre);
-        Datos.put("password", password);
-        //le asignamos el nombre de la base de datos
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Usuarios");
-        //hacemos que en la base de datos se listen por uid
-        databaseReference.child(uid)
-                //cada usuario que se registre tendra los siguientes datos en la "base de datos" de firebase
-                .setValue(Datos)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        progressDialog.dismiss();
-                        Toast.makeText(Registro.this, "Cuenta creada con éxito", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(Registro.this, MenuPrincipal.class));
-                        finish();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull  Exception e) {
-                        progressDialog.dismiss();
-                        Toast.makeText(Registro.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+            db.collection("Usuarios")
+                    .add(Datos)
+                    .addOnSuccessListener(documentReference -> {
+
+                        Toast.makeText(Registro.this, "Nota guardada con éxito.", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(Registro.this, "Error al guardar la nota.", Toast.LENGTH_SHORT).show());
+        } else {
+            Toast.makeText(Registro.this, "El campo de la nota está vacío o el usuario no está autenticado.", Toast.LENGTH_SHORT).show();
+        }
 
     }
 
+
+
     @Override
-    //al presionar flecha atras, nos enviara a la actividad anterior
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return super.onSupportNavigateUp();

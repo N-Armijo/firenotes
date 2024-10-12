@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.narmijo.notasfirebase">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:allowBackup="true"
@@ -11,35 +9,33 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.NotasFirebase">
         <activity
-            android:name=".Perfil.Perfil_Usuario"
+            android:name=".Detalle.Detalle_Nota"
             android:exported="false" />
         <activity
-            android:name=".NotasArchivadas.Notas_Archivadas"
+            android:name=".ActualizarNota.Actualizar_Nota"
             android:exported="false" />
+        <activity android:name=".Perfil.Perfil_Usuario" />
+        <activity android:name=".NotasArchivadas.Notas_Archivadas" />
+        <activity android:name=".ListarNotas.Listar_Notas" />
+        <activity android:name=".AgregarNota.Agregar_Nota" />
         <activity
-            android:name=".ListarNotas.Listar_Notas"
-            android:exported="false" />
+            android:name=".MenuPrincipal"
+            android:exported="true" />
         <activity
-            android:name=".AgregarNota.Agregar_Nota"
-            android:exported="false" /> <!-- SplashScreen como punto de entrada principal -->
+            android:name=".Registro"
+            android:exported="true" />
+        <activity
+            android:name=".Login"
+            android:exported="true" />
         <activity
             android:name=".SplashScreen"
-            android:exported="true"> <!-- Necesario para Android 12+ -->
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- MenuPrincipal -->
-        <activity
-            android:name=".MenuPrincipal"
-            android:exported="true" /> <!-- Registro de usuario -->
-        <activity
-            android:name=".Registro"
-            android:exported="true" /> <!-- Login -->
-        <activity
-            android:name=".Login"
-            android:exported="true" /> <!-- MainActivity -->
+        </activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">

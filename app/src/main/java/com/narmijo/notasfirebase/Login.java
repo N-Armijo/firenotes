@@ -1,11 +1,8 @@
 package com.narmijo.notasfirebase;
 
-
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,12 +13,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Login extends AppCompatActivity {
 
@@ -29,12 +27,11 @@ public class Login extends AppCompatActivity {
     Button Btn_Logeo;
     TextView UsuarioNuevoTXT;
 
-    ProgressDialog progressDialog;
-
     FirebaseAuth firebaseAuth;
+    FirebaseFirestore firestore;
 
-    //Validar los datos
-    String correo = "" , password = "";
+    // Validar los datos
+    String correo = "", password = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +49,7 @@ public class Login extends AppCompatActivity {
         UsuarioNuevoTXT = findViewById(R.id.UsuarioNuevoTXT);
 
         firebaseAuth = FirebaseAuth.getInstance();
-
-        progressDialog = new ProgressDialog(Login.this);
-        progressDialog.setTitle("Espere por favor");
-        progressDialog.setCanceledOnTouchOutside(false);
+        firestore = FirebaseFirestore.getInstance();  // Inicializa Firestore
 
         Btn_Logeo.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,50 +71,74 @@ public class Login extends AppCompatActivity {
         correo = CorreoLogin.getText().toString();
         password = PassLogin.getText().toString();
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(correo).matches()){
+        if (!Patterns.EMAIL_ADDRESS.matcher(correo).matches()) {
             Toast.makeText(this, "Correo inválido", Toast.LENGTH_SHORT).show();
-        }
-
-        else if (TextUtils.isEmpty(password)){
+        } else if (TextUtils.isEmpty(password)) {
             Toast.makeText(this, "Ingrese contraseña", Toast.LENGTH_SHORT).show();
-        }
-        else {
+        } else {
             LoginDeUsuario();
         }
-
     }
 
     private void LoginDeUsuario() {
-        progressDialog.setMessage("Iniciando sesión ...");
-        progressDialog.show();
-        firebaseAuth.signInWithEmailAndPassword(correo,password)
-                .addOnCompleteListener(Login.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-
-                        if (task.isSuccessful()){
-                            progressDialog.dismiss();
-                            FirebaseUser user = firebaseAuth.getCurrentUser();
-                            startActivity(new Intent(Login.this,MenuPrincipal.class));
-                            Toast.makeText(Login.this, "Bienvenido(a): "+user.getEmail(), Toast.LENGTH_SHORT).show();
-                            finish();
+        firebaseAuth.signInWithEmailAndPassword(correo, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = firebaseAuth.getCurrentUser();
+                        if (user != null) {
+                            VerificarUsuarioEnFirestore(user);
                         }
-                        else {
-                            progressDialog.dismiss();
-                            Toast.makeText(Login.this, "Verifique si el correo y contraseña son los correctos", Toast.LENGTH_SHORT).show();
-                        }
-
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
-                        Toast.makeText(Login.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
-
+                    } else {
+                        Toast.makeText(Login.this, "Error de autenticación: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
     }
-    // Al presionar la flecha hacia atras nos envia a la actividad de registro
+
+    // Verificar si el usuario ya existe en Firestore y agregarlo si es necesario
+    private void VerificarUsuarioEnFirestore(FirebaseUser user) {
+        final String userId = user.getUid();
+        firestore.collection("Usuarios").document(userId).get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot document = task.getResult();
+                        if (document != null && document.exists()) {
+                            // Usuario ya existe, simplemente entra a la app
+                            IrAlMenuPrincipal();
+                        } else {
+                            // Usuario no existe, agregarlo
+                            AgregarUsuarioAFirestore(user);
+                        }
+                    } else {
+                        Toast.makeText(Login.this, "Error al verificar el usuario.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private void AgregarUsuarioAFirestore(FirebaseUser user) {
+        String uid = user.getUid();
+        String correo = user.getEmail();
+
+        // Crear un mapa con los datos del usuario
+        Map<String, Object> usuarioData = new HashMap<>();
+        usuarioData.put("uid", uid);
+        usuarioData.put("correo", correo);
+
+        // Agregar a la colección "Usuarios"
+        firestore.collection("Usuarios").document(uid)
+                .set(usuarioData)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(Login.this, "Usuario registrado en Firestore.", Toast.LENGTH_SHORT).show();
+                    IrAlMenuPrincipal();
+                })
+                .addOnFailureListener(e -> Toast.makeText(Login.this, "Error al registrar usuario en Firestore.", Toast.LENGTH_SHORT).show());
+    }
+
+    private void IrAlMenuPrincipal() {
+        Intent intent = new Intent(Login.this, MenuPrincipal.class);
+        startActivity(intent);
+        finish();
+    }
+
     @Override
     public boolean onSupportNavigateUp() {
         onBackPressed();

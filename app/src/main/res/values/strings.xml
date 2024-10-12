@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">FireNotes</string>
+
+
     <!--MAIN ACTIVITY-->
     <string name="Btn_Login">Login</string>
     <string name="Btn_Registro">Registro</string>
@@ -12,6 +14,7 @@
     <string name="ConfirmarContrasenaEt">Confirmar contraseña</string>
     <string name="RegistrarUsuario">Registrar</string>
     <string name="TengounacuentaTXT">Tengo una cuenta</string>
+
 
     <!--ACTIVIDAD LOGIN-->
     <string name="IniciarSesionTXT">Iniciar sesión</string>
@@ -36,6 +39,7 @@
     <!---AGREGAR NOTA-->
     <string name="Uid_Usuario"> Uid del usuario</string>
     <string name="Correo_usuario">Correo de usuario</string>
+    <string name="Fecha_hora_actual_TXT">Fecha de registro</string>
     <string name="Fecha_hora_actual">Fecha y hora actual</string>
     <string name="Titulo"> Título </string>
     <string name="Descripcion"> Descripcion</string>
@@ -45,4 +49,58 @@
 
     <!--MENÚ-->
     <string name="Agregar_Nota_BD">Agregar</string>
+    <string name="Actualizar_Nota_BD">Actualizar</string>
+
+    <!--ITEM NOTA-->
+    <string name="Id_nota_Item">Id nota</string>
+    <string name="Uid_Usuario_Item"> Uid del usuario</string>
+    <string name="Correo_usuario_Item">Correo de usuario</string>
+    <string name="Fecha_hora_registro_Item">Fecha y hora registro</string>
+    <string name="Titulo_Item"> Título </string>
+    <string name="Descripcion_Item"> Descripcion</string>
+    <string name="Fecha_Item"> 00/00/0000 </string>
+    <string name="Estado_Item"> No finalizado</string>
+
+    <!--CUADRO DE DIALOGO OPCIONES-->
+    <string name="ElijaOpcionTXT">Elija una opción</string>
+    <string name="CD_Eliminar">Eliminar</string>
+    <string name="CD_Actualizar">Actualizar</string>
+
+    <!--ACTUALIZAR NOTA-->
+    <string name="Id_nota_A">Id nota</string>
+    <string name="Uid_Usuario_A"> Uid del usuario</string>
+    <string name="Correo_usuario_A">Correo de usuario</string>
+    <string name="Fecha_registro_A">Fecha de registro</string>
+    <string name="Titulo_A"> Título </string>
+    <string name="Descripcion_A"> Descripcion</string>
+    <string name="Btn_Calendario_A">Calendario</string>
+    <string name="Fecha_A"> 00/00/0000 </string>
+    <string name="Estado_A"> No finalizado</string>
+    <string name="Estado_nuevo"> -- </string>
+
+    <!---SPINNER - ESTADO-->
+    <string-array name="Estados_nota">
+        <item>"No finalizado"</item>
+        <item>"Finalizado"</item>
+    </string-array>
+
+    <!--DETALLE NOTA-->
+    <string name="Id_nota_Detalle_TXT">Id de la nota: </string>
+    <string name="Id_nota_Detalle">Id nota</string>
+    <string name="Uid_usuario_Detalle_TXT">Uid de usuario: </string>
+    <string name="Uid_usuario_Detalle">Uid usuario</string>
+    <string name="Correo_usuario_Detalle_TXT">Correo de usuario: </string>
+    <string name="Correo_usuario_Detalle">Correo usuario</string>
+    <string name="Titulo_Detalle_TXT">Título: </string>
+    <string name="Titulo_Detalle">Título</string>
+    <string name="Descripcion_Detalle_TXT">Descripción: </string>
+    <string name="Descripcion_Detalle">Descripcion</string>
+    <string name="Fecha_registro_Detalle_TXT">Fecha de registro: </string>
+    <string name="Fecha_Registro_Detalle">Fecha registro</string>
+    <string name="Fecha_Nota_Detalle_TXT">Fecha nota: </string>
+    <string name="Fecha_Nota_Detalle">Fecha nota</string>
+    <string name="Estado_Detalle_TXT">Estado de la nota: </string>
+    <string name="Estado_Detalle">Estado</string>
+
+
 </resources>

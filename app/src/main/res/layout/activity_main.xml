@@ -14,7 +14,7 @@
         android:padding="10dp"
         android:gravity="center">
 
-        <!--Animacion-->
+        <!--Animación-->
         <com.airbnb.lottie.LottieAnimationView
             android:layout_width="200dp"
             android:layout_height="200dp"
