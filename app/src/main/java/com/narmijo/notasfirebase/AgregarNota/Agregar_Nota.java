@@ -1,12 +1,18 @@
 package com.narmijo.notasfirebase.AgregarNota;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.narmijo.notasfirebase.R;
 
@@ -58,9 +64,33 @@ public class Agregar_Nota extends AppCompatActivity {
     private void Obtener_Fecha_Hora_Actual(){
         String Fecha_hora_registro = new SimpleDateFormat("dd-MM-yyyy/HH:mm:ss a",
                 Locale.getDefault()).format(System.currentTimeMillis());
-        //EJEMPLO: 11-10-2024/06:11:20 pm
+        //EJEMPLO: 13-11-2022/06:30:20 pm
         Fecha_hora_actual.setText(Fecha_hora_registro);
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_agenda, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId(); // Obtiene el ID del item seleccionado
+        Log.d("MenuItemID", "ID seleccionado: " + id); // Imprime el ID para depuración
+
+        switch (id) {
+            case 2131296259: // Usa el ID que obtuviste del log
+                Toast.makeText(this, "Nota agregada con éxito", Toast.LENGTH_SHORT).show();
+                break;
+            default:
+                Log.d("MainActivity Error", "ID no reconocido: " + id);
+                return false; // Si no coincide con ningún caso
+        }
+        return true;
+    }
+
 
     @Override
     public boolean onSupportNavigateUp() {

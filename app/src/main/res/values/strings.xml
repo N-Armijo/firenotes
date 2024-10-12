@@ -42,4 +42,7 @@
     <string name="Btn_Calendario">Calendario</string>
     <string name="Fecha"> 00/00/0000 </string>
     <string name="Estado"> No finalizado</string>
+
+    <!--MENÚ-->
+    <string name="Agregar_Nota_BD">Agregar</string>
 </resources>
