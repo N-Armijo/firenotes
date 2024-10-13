@@ -1,19 +1,26 @@
 package com.narmijo.notasfirebase;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 public class Login extends AppCompatActivity {
 
@@ -25,92 +32,97 @@ public class Login extends AppCompatActivity {
 
     FirebaseAuth firebaseAuth;
 
-    private FirebaseFirestore firestore; // Añade Firestore
+    //Validar los datos
+    String correo = "" , password = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        firebaseAuth = FirebaseAuth.getInstance();
-        firestore = FirebaseFirestore.getInstance(); // Inicializa Firestore
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle("Login");
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setDisplayShowHomeEnabled(true);
+
         CorreoLogin = findViewById(R.id.CorreoLogin);
         PassLogin = findViewById(R.id.PassLogin);
-        Button buttonLogin = findViewById(R.id.Btn_Logeo);
+        Btn_Logeo = findViewById(R.id.Btn_Logeo);
         UsuarioNuevoTXT = findViewById(R.id.UsuarioNuevoTXT);
 
-        buttonLogin.setOnClickListener(v -> loginUser());
-        UsuarioNuevoTXT.setOnClickListener(v -> registerUser());
+        firebaseAuth = FirebaseAuth.getInstance();
+
+        progressDialog = new ProgressDialog(Login.this);
+        progressDialog.setTitle("Espere por favor");
+        progressDialog.setCanceledOnTouchOutside(false);
+
+        Btn_Logeo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ValidarDatos();
+            }
+        });
+
+        UsuarioNuevoTXT.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                startActivity(new Intent(Login.this, Registro.class));
+            }
+        });
     }
 
-    private void loginUser() {
-        String email = CorreoLogin.getText().toString().trim();
-        String password = PassLogin.getText().toString().trim();
+    private void ValidarDatos() {
 
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(Login.this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
-            return;
+        correo = CorreoLogin.getText().toString();
+        password = PassLogin.getText().toString();
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(correo).matches()){
+            Toast.makeText(this, "Correo inválido", Toast.LENGTH_SHORT).show();
         }
 
-        firebaseAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = firebaseAuth.getCurrentUser();
-                        if (user != null) {
-                            // Obtener datos del usuario desde Firestore
-                            obtenerDatosUsuario(user.getUid());
+        else if (TextUtils.isEmpty(password)){
+            Toast.makeText(this, "Ingrese contraseña", Toast.LENGTH_SHORT).show();
+        }
+        else {
+            LoginDeUsuario();
+        }
+
+    }
+
+    private void LoginDeUsuario() {
+        progressDialog.setMessage("Iniciando sesión ...");
+        progressDialog.show();
+        firebaseAuth.signInWithEmailAndPassword(correo,password)
+                .addOnCompleteListener(Login.this, new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+
+                        if (task.isSuccessful()){
+                            progressDialog.dismiss();
+                            FirebaseUser user = firebaseAuth.getCurrentUser();
+                            startActivity(new Intent(Login.this,MenuPrincipal.class));
+                            Toast.makeText(Login.this, "Bienvenido(a): "+user.getEmail(), Toast.LENGTH_SHORT).show();
+                            finish();
                         }
-                    } else {
-                        Toast.makeText(Login.this, "Error de autenticación: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                        else {
+                            progressDialog.dismiss();
+                            Toast.makeText(Login.this, "Verifique si el correo y contraseña son los correctos", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                        Toast.makeText(Login.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
+
                     }
                 });
     }
 
-    private void obtenerDatosUsuario(String uid) {
-        firestore.collection("Usuarios").document(uid).get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful() && task.getResult() != null) {
-                        // Extraer datos del documento
-                        String nombres = task.getResult().getString("nombres");
-                        String correo = task.getResult().getString("correo");
-
-                        // Pasar datos a NotesActivity
-                        Intent intent = new Intent(Login.this, MenuPrincipal.class);
-                        intent.putExtra("uid", uid);
-                        intent.putExtra("nombres", nombres);
-                        intent.putExtra("correo", correo);
-                        startActivity(intent);
-                        finish(); // Cierra la actividad de login
-                    } else {
-                        Toast.makeText(Login.this, "Error al obtener datos del usuario.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-    private void registerUser() {
-        String email = CorreoLogin.getText().toString().trim();
-        String password = PassLogin.getText().toString().trim();
-
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(Login.this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if (password.length() < 6) {
-            Toast.makeText(Login.this, "La contraseña debe tener al menos 6 caracteres", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        firebaseAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(Login.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(Login.this, MenuPrincipal.class);
-                        startActivity(intent); // Inicia la actividad después de registrar
-                        finish(); // Cierra la actividad de login
-                    } else {
-                        Toast.makeText(Login.this, "Error en el registro: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return super.onSupportNavigateUp();
     }
 }
