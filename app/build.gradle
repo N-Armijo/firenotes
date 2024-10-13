@@ -52,7 +52,19 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:21.0.6'
     // (Opcional) Para el uso de UI de autenticación con Firebase
     implementation 'com.firebaseui:firebase-ui-auth:8.0.0'
+    // FirebaseUI for Firebase Realtime Database
+    implementation 'com.firebaseui:firebase-ui-database:8.0.2'
+
+    // FirebaseUI for Cloud Firestore
+    implementation 'com.firebaseui:firebase-ui-firestore:8.0.2'
+
+    // FirebaseUI for Firebase Auth
+    implementation 'com.firebaseui:firebase-ui-auth:8.0.2'
+
+    // FirebaseUI for Cloud Storage
+    implementation 'com.firebaseui:firebase-ui-storage:8.0.2'
 }
+
 
 configurations.all {
     resolutionStrategy.force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'

@@ -1,23 +1,69 @@
 [versions]
 agp = "8.3.2"
+androidxJunit = "1.1.3"
+annotation = "1.8.2"
+appcompatVersion = "1.3.1"
+constraintlayoutVersion = "2.1.1"
+espressoCoreVersion = "3.4.0"
+firebaseAnalytics = "22.1.2"
+firebaseAuth = "23.0.0"
+firebaseAuthVersion = "21.0.6"
+firebaseBom = "33.4.0"
+firebaseDatabase = "21.0.0"
+firebaseDatabaseVersion = "20.0.2"
+firebaseUiAuth = "8.0.2"
+firebaseUiAuthVersion = "8.0.0"
+firebaseUiDatabase = "8.0.0"
+firebaseUiDatabaseVersion = "8.0.2"
+firebaseuiFirebaseUiFirestore = "8.2.0"
+firebaseUiFirestore = "8.1.0"
+firebaseUiFirestoreVersion = "8.0.2"
+googleFirebaseFirestore = "24.1.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 appcompat = "1.7.0"
+lifecycleLivedataKtx = "2.8.6"
+lottie = "5.2.0"
 material = "1.12.0"
 activity = "1.8.0"
 constraintlayout = "2.1.4"
 firebaseFirestore = "25.1.0"
+materialVersion = "1.4.0"
 
 [libraries]
+annotation = { module = "androidx.annotation:annotation", version.ref = "annotation" }
+appcompat-v131 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
+constraintlayout-v211 = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayoutVersion" }
+espresso-core-v340 = { module = "androidx.test.espresso:espresso-core", version.ref = "espressoCoreVersion" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics", version.ref = "firebaseAnalytics" }
+firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
+firebase-auth-v2106 = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuthVersion" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-database = { module = "com.google.firebase:firebase-database", version.ref = "firebaseDatabase" }
+firebase-database-v2002 = { module = "com.google.firebase:firebase-database", version.ref = "firebaseDatabaseVersion" }
+firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
+firebase-ui-auth-v800 = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuthVersion" }
+firebase-ui-database = { module = "com.firebaseui:firebase-ui-database", version.ref = "firebaseUiDatabase" }
+firebase-ui-database-v802 = { module = "com.firebaseui:firebase-ui-database", version.ref = "firebaseUiDatabaseVersion" }
+firebase-ui-firestore = { module = "com.firebaseui:firebase-ui-firestore", version = "8.0.2" }
+firebase-ui-firestore-v802 = { module = "com.firebaseui:firebase-ui-firestore", version.ref = "firebaseUiFirestoreVersion" }
+firebase-ui-firestore-v820 = { module = "com.firebaseui:firebase-ui-firestore", version.ref = "firebaseuiFirebaseUiFirestore" }
+firebase-ui-storage = { module = "com.firebaseui:firebase-ui-storage", version.ref = "firebaseUiAuth" }
+google-firebase-firestore-v2410 = { module = "com.google.firebase:firebase-firestore", version.ref = "googleFirebaseFirestore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+junit-v113 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
+lifecycle-livedata-ktx = { module = "androidx.lifecycle:lifecycle-livedata-ktx", version.ref = "lifecycleLivedataKtx" }
+lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleLivedataKtx" }
+lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
+material-v140 = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
