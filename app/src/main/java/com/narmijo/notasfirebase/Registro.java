@@ -19,30 +19,34 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.narmijo.notasfirebase.R;
 
+
+//Experimental
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore; //  SE DEBE IMPORTAR PARA LLAMAR A DB
+
+
+//Esto parece estar desactualizado
+
+//import com.google.firebase.database.FirebaseDatabase;
+/**Lo de arriba parece estar desactualizado */
 
 import java.util.HashMap;
 
 
 public class Registro extends AppCompatActivity {
 
+
+    //private FirebaseAuth mAuth; aparece mas abajo , pero no private
+
+
+    private FirebaseFirestore db; //FALTA AGREGAR INSTANCIA DB
     EditText NombreEt,CorreoEt,ContasenaEt,ConfirmarContrasenaEt;
     Button RegistrarUsuario;
     TextView TengounacuentaTXT;
 
     FirebaseAuth firebaseAuth;
-
-
-
-    private FirebaseFirestore db;
     ProgressDialog progressDialog;
 
     //
@@ -52,6 +56,10 @@ public class Registro extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registro);
+
+        //DEBEMOS LLAMAR A LA DB  Y SU INSTANCIA
+        db = FirebaseFirestore.getInstance();
+
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle("Registrar");
@@ -65,9 +73,13 @@ public class Registro extends AppCompatActivity {
         RegistrarUsuario = findViewById(R.id.RegistrarUsuario);
         TengounacuentaTXT = findViewById(R.id.TengounacuentaTXT);
 
-        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseAuth = FirebaseAuth.getInstance(); // equivalente al mAuth
 
+        progressDialog = new ProgressDialog(Registro.this);
+        progressDialog.setTitle("Espere por favor");
+        progressDialog.setCanceledOnTouchOutside(false);
 
+        //BOTON de registrar usuario
         RegistrarUsuario.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -113,48 +125,67 @@ public class Registro extends AppCompatActivity {
     }
 
     private void CrearCuenta() {
+        progressDialog.setMessage("Creando su cuenta...");
+        progressDialog.show();
+
+        //Crear un usuario en Firebase
         firebaseAuth.createUserWithEmailAndPassword(correo, password)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        Toast.makeText(Registro.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+                        //
                         GuardarInformacion();
-                        Intent intent = new Intent(Registro.this, MenuPrincipal.class);
-                        startActivity(intent); // Inicia la actividad después de registrar
-                        finish(); // Cierra la actividad de login
-                    } else {
-                        Toast.makeText(Registro.this, "Error en el registro: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        progressDialog.dismiss();
+                        Toast.makeText(Registro.this, ""+e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
 
     }
 
-    private void GuardarInformacion() {
-        FirebaseUser user = firebaseAuth.getCurrentUser();
-        if (user != null ) {
-            //Obtener la identificación de usuario actual
-            String uid = firebaseAuth.getUid();
 
+    /**
+     * Aqui se empieza a mover el asunto
+     *
+     *
+     */
+    private void GuardarInformacion() {
+        progressDialog.setMessage("Guardando su información");
+
+        // Obtener la identificación de usuario actual
+        String uid = firebaseAuth.getUid();
+        FirebaseUser user = firebaseAuth.getCurrentUser();  // Corrección aquí
+
+        if (user != null) {
+            // Crear un HashMap con los datos
             HashMap<String, String> Datos = new HashMap<>();
-            Datos.put("uid",  uid);
+            Datos.put("uid", uid);
             Datos.put("correo", correo);
             Datos.put("nombres", nombre);
             Datos.put("password", password);
-            //Es la db
 
+            // Agregar datos a la base de datos Firestore
             db.collection("Usuarios")
-                    .add(Datos)
+                    .add(Datos) // Almacena los datos en Firestore
                     .addOnSuccessListener(documentReference -> {
-
-                        Toast.makeText(Registro.this, "Nota guardada con éxito.", Toast.LENGTH_SHORT).show();
+                        progressDialog.dismiss();  // Dismiss el dialog aquí
+                        Toast.makeText(Registro.this, "Cuenta agregada con éxito.", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(Registro.this, MenuPrincipal.class));
+                        finish();
                     })
-                    .addOnFailureListener(e -> Toast.makeText(Registro.this, "Error al guardar la nota.", Toast.LENGTH_SHORT).show());
+                    .addOnFailureListener(e -> {
+                        progressDialog.dismiss();  // Dismiss también aquí
+                        Toast.makeText(Registro.this, "" + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
         } else {
-            Toast.makeText(Registro.this, "El campo de la nota está vacío o el usuario no está autenticado.", Toast.LENGTH_SHORT).show();
+            progressDialog.dismiss();
+            Toast.makeText(Registro.this, "Hubo un error", Toast.LENGTH_SHORT).show();
         }
-
     }
-
-
+//Aqui arriba esta lo critico
 
     @Override
     public boolean onSupportNavigateUp() {

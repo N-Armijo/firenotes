@@ -1,25 +1,19 @@
 package com.narmijo.notasfirebase;
 
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
-import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class Login extends AppCompatActivity {
 
@@ -27,66 +21,44 @@ public class Login extends AppCompatActivity {
     Button Btn_Logeo;
     TextView UsuarioNuevoTXT;
 
-    FirebaseAuth firebaseAuth;
-    FirebaseFirestore firestore;
+    ProgressDialog progressDialog;
 
-    // Validar los datos
-    String correo = "", password = "";
+    FirebaseAuth firebaseAuth;
+
+    private FirebaseFirestore firestore; // Añade Firestore
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle("Login");
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setDisplayShowHomeEnabled(true);
-
+        firebaseAuth = FirebaseAuth.getInstance();
+        firestore = FirebaseFirestore.getInstance(); // Inicializa Firestore
         CorreoLogin = findViewById(R.id.CorreoLogin);
         PassLogin = findViewById(R.id.PassLogin);
-        Btn_Logeo = findViewById(R.id.Btn_Logeo);
+        Button buttonLogin = findViewById(R.id.Btn_Logeo);
         UsuarioNuevoTXT = findViewById(R.id.UsuarioNuevoTXT);
 
-        firebaseAuth = FirebaseAuth.getInstance();
-        firestore = FirebaseFirestore.getInstance();  // Inicializa Firestore
-
-        Btn_Logeo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ValidarDatos();
-            }
-        });
-
-        UsuarioNuevoTXT.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(Login.this, Registro.class));
-            }
-        });
+        buttonLogin.setOnClickListener(v -> loginUser());
+        UsuarioNuevoTXT.setOnClickListener(v -> registerUser());
     }
 
-    private void ValidarDatos() {
+    private void loginUser() {
+        String email = CorreoLogin.getText().toString().trim();
+        String password = PassLogin.getText().toString().trim();
 
-        correo = CorreoLogin.getText().toString();
-        password = PassLogin.getText().toString();
-
-        if (!Patterns.EMAIL_ADDRESS.matcher(correo).matches()) {
-            Toast.makeText(this, "Correo inválido", Toast.LENGTH_SHORT).show();
-        } else if (TextUtils.isEmpty(password)) {
-            Toast.makeText(this, "Ingrese contraseña", Toast.LENGTH_SHORT).show();
-        } else {
-            LoginDeUsuario();
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(Login.this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
+            return;
         }
-    }
 
-    private void LoginDeUsuario() {
-        firebaseAuth.signInWithEmailAndPassword(correo, password)
+        firebaseAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = firebaseAuth.getCurrentUser();
                         if (user != null) {
-                            VerificarUsuarioEnFirestore(user);
+                            // Obtener datos del usuario desde Firestore
+                            obtenerDatosUsuario(user.getUid());
                         }
                     } else {
                         Toast.makeText(Login.this, "Error de autenticación: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -94,54 +66,51 @@ public class Login extends AppCompatActivity {
                 });
     }
 
-    // Verificar si el usuario ya existe en Firestore y agregarlo si es necesario
-    private void VerificarUsuarioEnFirestore(FirebaseUser user) {
-        final String userId = user.getUid();
-        firestore.collection("Usuarios").document(userId).get()
+    private void obtenerDatosUsuario(String uid) {
+        firestore.collection("Usuarios").document(uid).get()
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document != null && document.exists()) {
-                            // Usuario ya existe, simplemente entra a la app
-                            IrAlMenuPrincipal();
-                        } else {
-                            // Usuario no existe, agregarlo
-                            AgregarUsuarioAFirestore(user);
-                        }
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        // Extraer datos del documento
+                        String nombres = task.getResult().getString("nombres");
+                        String correo = task.getResult().getString("correo");
+
+                        // Pasar datos a NotesActivity
+                        Intent intent = new Intent(Login.this, MenuPrincipal.class);
+                        intent.putExtra("uid", uid);
+                        intent.putExtra("nombres", nombres);
+                        intent.putExtra("correo", correo);
+                        startActivity(intent);
+                        finish(); // Cierra la actividad de login
                     } else {
-                        Toast.makeText(Login.this, "Error al verificar el usuario.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(Login.this, "Error al obtener datos del usuario.", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    private void AgregarUsuarioAFirestore(FirebaseUser user) {
-        String uid = user.getUid();
-        String correo = user.getEmail();
+    private void registerUser() {
+        String email = CorreoLogin.getText().toString().trim();
+        String password = PassLogin.getText().toString().trim();
 
-        // Crear un mapa con los datos del usuario
-        Map<String, Object> usuarioData = new HashMap<>();
-        usuarioData.put("uid", uid);
-        usuarioData.put("correo", correo);
+        if (email.isEmpty() || password.isEmpty()) {
+            Toast.makeText(Login.this, "Completa todos los campos", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        // Agregar a la colección "Usuarios"
-        firestore.collection("Usuarios").document(uid)
-                .set(usuarioData)
-                .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(Login.this, "Usuario registrado en Firestore.", Toast.LENGTH_SHORT).show();
-                    IrAlMenuPrincipal();
-                })
-                .addOnFailureListener(e -> Toast.makeText(Login.this, "Error al registrar usuario en Firestore.", Toast.LENGTH_SHORT).show());
-    }
+        if (password.length() < 6) {
+            Toast.makeText(Login.this, "La contraseña debe tener al menos 6 caracteres", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-    private void IrAlMenuPrincipal() {
-        Intent intent = new Intent(Login.this, MenuPrincipal.class);
-        startActivity(intent);
-        finish();
-    }
-
-    @Override
-    public boolean onSupportNavigateUp() {
-        onBackPressed();
-        return super.onSupportNavigateUp();
+        firebaseAuth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(Login.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(Login.this, MenuPrincipal.class);
+                        startActivity(intent); // Inicia la actividad después de registrar
+                        finish(); // Cierra la actividad de login
+                    } else {
+                        Toast.makeText(Login.this, "Error en el registro: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 }
