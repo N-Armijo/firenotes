@@ -143,7 +143,7 @@ public class Agregar_Nota extends AppCompatActivity {
             nota.put("fecha_hora_actual", fecha_hora_actual);
             nota.put("titulo", titulo);
             nota.put("descripcion", descripcion);
-            nota.put("fecha", fecha);
+            nota.put("fecha_nota", fecha);
             nota.put("estado", estado);
 
             // Agregar la nota a Firestore en la colección "Notas_Publicadas"

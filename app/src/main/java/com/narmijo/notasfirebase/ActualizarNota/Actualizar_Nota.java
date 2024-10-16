@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.util.Log;  // Agregado para logs
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -20,30 +21,27 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-import com.narmijo.notasfirebase.AgregarNota.Agregar_Nota;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.narmijo.notasfirebase.R;
 
 import java.util.Calendar;
 
 public class Actualizar_Nota extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
-    TextView Id_nota_A, Uid_Usuario_A, Correo_usuario_A, Fecha_registro_A , Fecha_A, Estado_A, Estado_nuevo;
+    TextView Id_nota_A, Uid_Usuario_A, Correo_usuario_A, Fecha_registro_A, Fecha_A, Estado_A, Estado_nuevo;
     EditText Titulo_A, Descripcion_A;
     Button Btn_Calendario_A;
 
-    //DECLARAR LOS STRING PARA ALMACENAR LOS DATOS RECUPERADOS DE ACTIVIDAD ANTERIOR
-    String id_nota_R , uid_usuario_R , correo_usuario_R, fecha_registro_R, titulo_R, descripcion_R, fecha_R, estado_R;
+    // DECLARAR LOS STRING PARA ALMACENAR LOS DATOS RECUPERADOS DE ACTIVIDAD ANTERIOR
+    String id_nota_R, uid_usuario_R, correo_usuario_R, fecha_registro_R, titulo_R, descripcion_R, fecha_R, estado_R;
 
     ImageView Tarea_Finalizada, Tarea_No_Finalizada;
 
     Spinner Spinner_estado;
-    int dia, mes , anio;
+    int dia, mes, anio;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,7 +67,7 @@ public class Actualizar_Nota extends AppCompatActivity implements AdapterView.On
         });
     }
 
-    private void InicializarVistas(){
+    private void InicializarVistas() {
         Id_nota_A = findViewById(R.id.Id_nota_A);
         Uid_Usuario_A = findViewById(R.id.Uid_Usuario_A);
         Correo_usuario_A = findViewById(R.id.Correo_usuario_A);
@@ -87,23 +85,28 @@ public class Actualizar_Nota extends AppCompatActivity implements AdapterView.On
         Estado_nuevo = findViewById(R.id.Estado_nuevo);
     }
 
-    private void RecuperarDatos(){
+    private void RecuperarDatos() {
         Bundle intent = getIntent().getExtras();
 
-        id_nota_R = intent.getString("id_nota");
-        uid_usuario_R = intent.getString("uid_usuario");
-        correo_usuario_R = intent.getString("correo_usuario");
-        fecha_registro_R = intent.getString("fecha_registro");
-        titulo_R = intent.getString("titulo");
-        descripcion_R = intent.getString("descripcion");
-        fecha_R = intent.getString("fecha_nota");
-        estado_R = intent.getString("estado");
+        if (intent != null) {
+            id_nota_R = intent.getString("id_nota");
+            uid_usuario_R = intent.getString("uid_usuario");
+            correo_usuario_R = intent.getString("correo_usuario");
+            fecha_registro_R = intent.getString("fecha_registro");
+            titulo_R = intent.getString("titulo");
+            descripcion_R = intent.getString("descripcion");
+            fecha_R = intent.getString("fecha_nota");
+            estado_R = intent.getString("estado");
 
-
-
+            Log.d("RecuperarDatos", "id_nota: " + id_nota_R);
+            Log.d("RecuperarDatos", "uid_usuario: " + uid_usuario_R);
+            // Log para los demás valores
+        } else {
+            Log.e("RecuperarDatos", "El intent es nulo");
+        }
     }
 
-    private void SetearDatos(){
+    private void SetearDatos() {
         Id_nota_A.setText(id_nota_R);
         Uid_Usuario_A.setText(uid_usuario_R);
         Correo_usuario_A.setText(correo_usuario_R);
@@ -112,21 +115,20 @@ public class Actualizar_Nota extends AppCompatActivity implements AdapterView.On
         Descripcion_A.setText(descripcion_R);
         Fecha_A.setText(fecha_R);
         Estado_A.setText(estado_R);
-
     }
 
-    private void ComprobarEstadoNota(){
+    private void ComprobarEstadoNota() {
         String estado_nota = Estado_A.getText().toString();
 
-        if (estado_nota.equals("No finalizado")){
+        if (estado_nota.equals("No finalizado")) {
             Tarea_No_Finalizada.setVisibility(View.VISIBLE);
         }
-        if (estado_nota.equals("Finalizado")){
+        if (estado_nota.equals("Finalizado")) {
             Tarea_Finalizada.setVisibility(View.VISIBLE);
         }
     }
 
-    private void SeleccionarFecha(){
+    private void SeleccionarFecha() {
         final Calendar calendario = Calendar.getInstance();
 
         dia = calendario.get(Calendar.DAY_OF_MONTH);
@@ -139,81 +141,76 @@ public class Actualizar_Nota extends AppCompatActivity implements AdapterView.On
 
                 String diaFormateado, mesFormateado;
 
-                //OBTENER DIA
-                if (DiaSeleccionado < 10){
-                    diaFormateado = "0"+String.valueOf(DiaSeleccionado);
-                    // Antes: 9/11/2022 -  Ahora 09/11/2022
-                }else {
+                // OBTENER DIA
+                if (DiaSeleccionado < 10) {
+                    diaFormateado = "0" + String.valueOf(DiaSeleccionado);
+                } else {
                     diaFormateado = String.valueOf(DiaSeleccionado);
-                    //Ejemplo 13/08/2022
                 }
 
-                //OBTENER EL MES
+                // OBTENER EL MES
                 int Mes = MesSeleccionado + 1;
 
-                if (Mes < 10){
-                    mesFormateado = "0"+String.valueOf(Mes);
-                    // Antes: 09/8/2022 -  Ahora 09/08/2022
-                }else {
+                if (Mes < 10) {
+                    mesFormateado = "0" + String.valueOf(Mes);
+                } else {
                     mesFormateado = String.valueOf(Mes);
-                    //Ejemplo 13/10/2022 - 13/11/2022 - 13/12/2022
-
                 }
 
-                //Setear fecha en TextView
-                Fecha_A.setText(diaFormateado + "/" + mesFormateado + "/"+ AnioSeleccionado);
-
+                // Setear fecha en TextView
+                Fecha_A.setText(diaFormateado + "/" + mesFormateado + "/" + AnioSeleccionado);
             }
-        }
-                ,anio,mes,dia);
+        }, anio, mes, dia);
         datePickerDialog.show();
     }
 
-    private void Spinner_Estado(){
+    private void Spinner_Estado() {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.Estados_nota, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         Spinner_estado.setAdapter(adapter);
         Spinner_estado.setOnItemSelectedListener(this);
-
     }
 
-    private void ActualizarNotaBD(){
+    private void ActualizarNotaBD() {
         String tituloActualizar = Titulo_A.getText().toString();
         String descripcionActualizar = Descripcion_A.getText().toString();
         String fechaActualizar = Fecha_A.getText().toString();
         String estadoActualizar = Estado_nuevo.getText().toString();
 
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference databaseReference = firebaseDatabase.getReference("Notas_Publicadas");
+        // Validar que los campos no estén vacíos
+        if (tituloActualizar.isEmpty() || descripcionActualizar.isEmpty() || fechaActualizar.isEmpty() || estadoActualizar.isEmpty()) {
+            Toast.makeText(Actualizar_Nota.this, "Por favor, completa todos los campos.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        //Consulta
-        Query query = databaseReference.orderByChild("id_nota").equalTo(id_nota_R);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        // Obtener la referencia al documento en Firestore
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference docRef = db.collection("Notas_Publicadas").document(id_nota_R);
+
+        // Actualizar los campos del documento
+        docRef.update(
+                "titulo", tituloActualizar,
+                "descripcion", descripcionActualizar,
+                "fecha_nota", fechaActualizar,
+                "estado", estadoActualizar
+        ).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot ds : snapshot.getChildren()){
-                    ds.getRef().child("titulo").setValue(tituloActualizar);
-                    ds.getRef().child("descripcion").setValue(descripcionActualizar);
-                    ds.getRef().child("fecha_nota").setValue(fechaActualizar);
-                    ds.getRef().child("estado").setValue(estadoActualizar);
-                }
-
+            public void onSuccess(Void aVoid) {
                 Toast.makeText(Actualizar_Nota.this, "Nota actualizada con éxito", Toast.LENGTH_SHORT).show();
-                onBackPressed();
-
+                onBackPressed(); // Regresar a la actividad anterior
             }
-
+        }).addOnFailureListener(new OnFailureListener() {
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
+            public void onFailure(@NonNull Exception e) {
+                Log.e("FirestoreError", "Error al actualizar documento", e);
+                Toast.makeText(Actualizar_Nota.this, "Error al actualizar la nota: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-
         String ESTADO_ACTUAL = Estado_A.getText().toString();
 
         String Posicion_1 = adapterView.getItemAtPosition(1).toString();
@@ -221,16 +218,13 @@ public class Actualizar_Nota extends AppCompatActivity implements AdapterView.On
         String estado_seleccionado = adapterView.getItemAtPosition(i).toString();
         Estado_nuevo.setText(estado_seleccionado);
 
-        if (ESTADO_ACTUAL.equals("Finalizado")){
+        if (ESTADO_ACTUAL.equals("Finalizado")) {
             Estado_nuevo.setText(Posicion_1);
         }
-
     }
 
     @Override
-    public void onNothingSelected(AdapterView<?> adapterView) {
-
-    }
+    public void onNothingSelected(AdapterView<?> adapterView) {}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -241,9 +235,10 @@ public class Actualizar_Nota extends AppCompatActivity implements AdapterView.On
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == R.id.Actualizar_Nota_BD) {
+        int id = item.getItemId();
+
+        if (id == R.id.Actualizar_Nota_BD) {
             ActualizarNotaBD();
-            //Toast.makeText(this, "Nota actualizada", Toast.LENGTH_SHORT).show();
         }
         return super.onOptionsItemSelected(item);
     }
