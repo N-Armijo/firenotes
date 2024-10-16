@@ -5,54 +5,50 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/system_accent1_800"
+    android:background="@color/icono_notas_pet_background"
     tools:context=".SplashScreen">
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="6dp"
-        android:layout_marginBottom="-2dp"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:gravity="center">
 
         <com.airbnb.lottie.LottieAnimationView
             android:layout_width="200dp"
             android:layout_height="200dp"
-            app:lottie_autoPlay="true"
-            app:lottie_fileName="toffo.json"
             app:lottie_imageAssetsFolder="assets"
-            app:lottie_loop="true" />
+            app:lottie_fileName="toffo.json"
+            app:lottie_loop="true"
+            app:lottie_autoPlay="true"/>
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:textSize="30sp"
             android:layout_marginTop="15dp"
-            android:fontFamily="@font/roboto"
-
             android:text="@string/app_name"
-            android:textColor="#FFFFFF"
-            android:textSize="30sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
             android:fontFamily="@font/roboto"
-            android:textColor="#FFFFFF"
-            android:text="@string/app_version"
-            android:textSize="10sp" />
-
-        <TextView
+            android:textColor="@color/white"
+            android:textStyle="bold"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:textSize="10sp"
+            android:layout_marginTop="5dp"
+            android:text="@string/app_version"
+            android:fontFamily="@font/roboto"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:textSize="40sp"
             android:layout_marginTop="15dp"
-            android:fontFamily="@font/handwrite"
-            android:textColor="#FFFFFF"
             android:text="@string/app_developer"
-            android:textSize="40sp" />
+            android:fontFamily="@font/handwrite"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
